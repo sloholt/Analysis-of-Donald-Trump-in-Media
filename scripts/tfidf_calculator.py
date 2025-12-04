@@ -2,8 +2,10 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 import numpy as np
 import sys
+import seaborn as sns
+import matplotlib.pyplot as plt
 
-INPUT_PATH = "../data/trump_media_dataset_528 - trump_media_dataset_528.csv"
+INPUT_PATH = "../data/ANNOTATED_trump_dataset_500.csv"
 TEXT_COLS = ["title", "description"]
 TOPIC_COLS = "PRIMARY_TOPIC"
 OUTPUT_PATH = "tf-idf.csv"
@@ -17,6 +19,9 @@ EXPECTED_CATEGORIES = [
     "GOP",
     "OTHER",
 ]
+# Exclude from word counts
+CUSTOM_STOP_WORDS = ["donald", "trump"]
+TOP_10 = 10
 
 
 def load_and_prepare_data(input_path, text_cols, topic_cols, expected_cats):
@@ -65,7 +70,10 @@ def calc_tfidf(topic_text, top_n, int=10):
     Use Tfidvectorizer to calculate the scores and set stop_words = 'english' to remove common words like 'the', 'a', 'is', etc
     mid_df = 2 ensures a word appears at least twice in the categories to be considered. 
     """
-    vectorizer = TfidfVectorizer(stop_words="english")
+    vectorizer = TfidfVectorizer(
+        stop_words=list(TfidfVectorizer(stop_words="english").get_stop_words())
+        + CUSTOM_STOP_WORDS
+    )
     # Checks if vectorizer is empty
     try:
         tfidf_matrix = vectorizer.fit_transform(corpus)
@@ -117,6 +125,7 @@ def main():
         sys.exit()
 
     final_df = calc_tfidf(topic_texts, top_n=10)
+    visualize_tfidf_scores(final_df)
 
     if not final_df.empty:
         try:
@@ -127,6 +136,50 @@ def main():
             print(f"\n Error saving file to csv: {e}")
     else:
         print("\n Output Skipped: No results to save")
+
+
+def visualize_tfidf_scores(df):
+    if df is None or df.empty:
+        print("No data to process or visualize")
+        return
+    # Display the full table
+    print("--- TF-IDF Score Table (All Results) ---")
+    print(df.to_markdown(index=False, floatfmt=".3f"))
+    print("\n" + "=" * 50 + "\n")
+
+    top_keywords_df = df.groupby("Category").head(TOP_10).reset_index(drop=True)
+    top_keywords_df = top_keywords_df.sort_values(
+        by=["Category", "TFIDF_Score"], ascending=[True, False]
+    )
+    plt.style.use("fivethirtyeight")
+    g = sns.catplot(
+        data=top_keywords_df,
+        y="Keyword",
+        x="TFIDF_Score",
+        col="Category",
+        kind="bar",
+        col_wrap=2,
+        sharex=False,
+        palette="viridis",
+        height=5,
+        aspect=1.5,
+    )
+    g.fig.suptitle(
+        f"Top {TOP_10} Keywords by TF-IDF Score Across Topics",
+        y=1.02,
+        fontsize=16,
+        fontweight="bold",
+    )
+    for ax in g.axes.flat:
+        if ax.get_title():
+            title = ax.get_title().replace("Category = ", "")
+            ax.set_title(title, fontsize=12, fontweight="bold")
+        ax.set_xlabel("TF-IDF Score", fontsize=10)
+        ax.set_ylabel("Keyword", fontsize=10)
+        ax.invert_yaxis()
+
+        plt.tight_layout(rect=[0, 0, 1, 0.98])
+        plt.show()
 
 
 if __name__ == "__main__":
