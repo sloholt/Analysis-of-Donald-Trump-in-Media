@@ -1,0 +1,9 @@
+pandas
+requests
+gnews
+google-generativeai
+python-dotenv
+seaborn
+matplotlib
+scikit-learn
+openai

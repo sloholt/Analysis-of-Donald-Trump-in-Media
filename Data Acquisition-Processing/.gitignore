@@ -1,0 +1,45 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Environment variables
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data files (keep only important ones)
+*.csv
+!data/final_articles.csv
+!data/coded_articles.csv
+!data/source_analysis.csv
+!data/topic_keywords.csv
+!data/topic_summaries.csv
+
+# Raw data
+!data/raw/*.csv
+!data/intermediate/*.csv
+# data/raw_articles*.csv
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Project specific
+*.log
