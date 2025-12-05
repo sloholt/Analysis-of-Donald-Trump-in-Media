@@ -20,7 +20,7 @@ EXPECTED_CATEGORIES = [
     "OTHER",
 ]
 # Exclude from word counts
-CUSTOM_STOP_WORDS = ["donald", "trump"]
+CUSTOM_STOP_WORDS = ["donald", "trump", "jan", "republicans", "6th"]
 TOP_10 = 10
 
 
@@ -125,7 +125,7 @@ def main():
         sys.exit()
 
     final_df = calc_tfidf(topic_texts, top_n=10)
-    visualize_tfidf_scores(final_df)
+    # visualize_tfidf_scores(final_df)
 
     if not final_df.empty:
         try:
